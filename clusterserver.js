@@ -5,7 +5,7 @@ var transports = engine.transports;
 var EventEmitter = require('events').EventEmitter;
 var base64id = require('base64id');
 
-var ClusterServer = function(options) {
+var ClusterServer = function (options) {
 	var self = this;
 	var opts = {};
 	var i;
@@ -147,7 +147,7 @@ ClusterServer.prototype.handshake = function (transport, req) {
 	});
 	
 	socket.once('close', function () {
-		self._ioClusterClient.unbind(socket, function(err) {
+		self._ioClusterClient.unbind(socket, function (err) {
 			if (err) {
 				self.emit('error', new Error('Failed to unbind socket from io cluster - ' + err));
 			} else {
