@@ -34,6 +34,7 @@ var ClusterServer = function (options) {
 	this.sourcePort = opts.sourcePort;
 	this.hostAddress = opts.hostAddress;
 	this.secure = opts.secure ? 1 : 0;
+	this.logLevel = opts.logLevel;
 	
 	this._ioClusterClient = opts.ioClusterClient;
 	if (this.appName) {
@@ -132,11 +133,16 @@ ClusterServer.prototype.handshake = function (transport, req) {
 	var ssid = this._parseSessionId(headers.cookie);
 	socket.ssid = ssid || socket.id;
 	
-	this._ioClusterClient.bind(socket, function (err) {
+	this._ioClusterClient.bind(socket, function (err, logLevel) {
 		socket.on('error', self._handleSocketError);
 		if (err) {
+			if (logLevel == null) {
+				logLevel = 0;
+			}
 			var errorMessage = 'Failed to bind socket to io cluster - ' + err;
-			self.emit('error', new Error(errorMessage));
+			if (self.logLevel >= logLevel) {
+				self.emit('error', new Error(errorMessage));
+			}
 			socket.emit('fail', errorMessage);
 		} else {
 			socket.session = self._ioClusterClient.session(socket.ssid, socket.id);
