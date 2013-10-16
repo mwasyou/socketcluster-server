@@ -28,7 +28,7 @@ var ClusterServer = function (options) {
 	opts.pingInterval = opts.pingInterval * 1000;
 	opts.upgradeTimeout = opts.upgradeTimeout * 1000;
 	
-	opts.cookie = '__/' + opts.appName + '/io';
+	opts.cookie = 'n/' + opts.appName + '/io';
 	
 	Server.call(this, opts);
 	
@@ -38,7 +38,7 @@ var ClusterServer = function (options) {
 	this.logLevel = opts.logLevel;
 	
 	this._ioClusterClient = opts.ioClusterClient;
-	this._sessionIdRegex = new RegExp('(__/' + opts.appName + '/ssid=)([^;]*)');
+	this._sessionIdRegex = new RegExp('(n/' + opts.appName + '/ssid=)([^;]*)');
 	this._hostRegex = /^[^:]*/;
 	
 	this._handleSocketError = function (error) {
