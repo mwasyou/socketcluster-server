@@ -35,7 +35,6 @@ var ClusterServer = function (options) {
 	this.sourcePort = opts.sourcePort;
 	this.hostAddress = opts.hostAddress;
 	this.secure = opts.secure ? 1 : 0;
-	this.logLevel = opts.logLevel;
 	
 	this._ioClusterClient = opts.ioClusterClient;
 	this._sessionIdRegex = new RegExp('(n/' + opts.appName + '/ssid=)([^;]*)');
