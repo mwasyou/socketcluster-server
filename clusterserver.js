@@ -32,8 +32,8 @@ var ClusterServer = function (options) {
 	opts.pingInterval = opts.pingInterval * 1000;
 	opts.upgradeTimeout = opts.upgradeTimeout * 1000;
 	
-	opts.cookie = 'n/' + opts.hostname + '/' + opts.sourcePort + '/io';
-	opts.sessionCookie = 'n/' + opts.hostname + '/' + opts.sourcePort + '/ssid';
+	opts.cookie = 'n/' + opts.appName + '/io';
+	opts.sessionCookie = 'n/' + opts.appName + '/ssid';
 	
 	Server.call(this, opts);
 	
@@ -44,6 +44,7 @@ var ClusterServer = function (options) {
 	this._ioClusterClient = opts.ioClusterClient;
 	this._sessionIdRegex = new RegExp('(' + opts.sessionCookie + '=)([^;]*)');
 	this._hostRegex = /^[^:]*/;
+	this._appName = opts.appName;
 	
 	this._handleSocketError = function (error) {
 		self.emit('error', error);
@@ -159,7 +160,10 @@ ClusterServer.prototype.handshake = function (transport, req) {
 			socket.session = self._ioClusterClient.session(socket.ssid, socket.id);
 			socket.global = self._ioClusterClient.global(socket.id);
 			self.emit('connection', socket);
-			socket.emit('connect', socket.id);
+			socket.emit('connect', {
+				soid: socket.id,
+				appName: self._appName
+			});
 		}
 	});
 	
