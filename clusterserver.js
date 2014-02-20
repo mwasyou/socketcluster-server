@@ -7,7 +7,11 @@ var base64id = require('base64id');
 
 var ClusterServer = function (options) {
 	var self = this;
-	var opts = {};
+	var opts = {
+		transports: ['polling', 'websocket'],
+		hostname: 'localhost'
+	};
+	
 	var i;
 	for (i in options) {
 		opts[i] = options[i];
@@ -28,16 +32,17 @@ var ClusterServer = function (options) {
 	opts.pingInterval = opts.pingInterval * 1000;
 	opts.upgradeTimeout = opts.upgradeTimeout * 1000;
 	
-	opts.cookie = 'n/' + opts.appName + '/io';
+	opts.cookie = 'n/' + opts.hostname + '/' + opts.sourcePort + '/io';
+	opts.sessionCookie = 'n/' + opts.hostname + '/' + opts.sourcePort + '/ssid';
 	
 	Server.call(this, opts);
 	
 	this.sourcePort = opts.sourcePort;
-	this.hostAddress = opts.hostAddress;
+	this.hostname = opts.hostname;
 	this.secure = opts.secure ? 1 : 0;
 	
 	this._ioClusterClient = opts.ioClusterClient;
-	this._sessionIdRegex = new RegExp('(n/' + opts.appName + '/ssid=)([^;]*)');
+	this._sessionIdRegex = new RegExp('(' + opts.sessionCookie + '=)([^;]*)');
 	this._hostRegex = /^[^:]*/;
 	
 	this._handleSocketError = function (error) {
@@ -59,8 +64,8 @@ ClusterServer.prototype._parseSessionId = function (cookieString) {
 
 ClusterServer.prototype.generateId = function (req) {
 	var host;
-	if (this.hostAddress) {
-		host = this.hostAddress;
+	if (this.hostname) {
+		host = this.hostname;
 	} else {
 		host = req.headers.host.match(this._hostRegex);
 		if (host) {
@@ -70,6 +75,12 @@ ClusterServer.prototype.generateId = function (req) {
 		}
 	}
 	var port = req.connection.address().port;
+	var sourcePort;
+	if (this.sourcePort == null) {
+		sourcePort = port;
+	} else {
+		sourcePort = this.sourcePort;
+	}
 	return host + '_' + port + '_' + this.sourcePort + '_' + this.secure + '_' + base64id.generateId();
 };
 
