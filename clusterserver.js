@@ -45,6 +45,7 @@ var ClusterServer = function (options) {
 	this._sessionIdRegex = new RegExp('(' + opts.sessionCookie + '=)([^;]*)');
 	this._hostRegex = /^[^:]*/;
 	this._appName = opts.appName;
+	this._url = opts.path;
 	
 	this._handleSocketError = function (error) {
 		self.emit('error', error);
@@ -52,6 +53,10 @@ var ClusterServer = function (options) {
 };
 
 ClusterServer.prototype = Object.create(Server.prototype);
+
+ClusterServer.prototype.getURL = function () {
+	return this._url;
+};
 
 ClusterServer.prototype._parseSessionId = function (cookieString) {
 	if(typeof cookieString == 'string') {
