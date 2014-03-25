@@ -45,7 +45,7 @@ var ClusterServer = function (options) {
 	this._sessionIdRegex = new RegExp('(' + opts.sessionCookie + '=)([^;]*)');
 	this._hostRegex = /^[^:]*/;
 	this._appName = opts.appName;
-	this._url = opts.path;
+	this._url = opts.path || '/engine.io';
 	
 	this._handleSocketError = function (error) {
 		self.emit('error', error);
