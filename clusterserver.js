@@ -9,7 +9,7 @@ var ClusterServer = function (options) {
 	var self = this;
 	var opts = {
 		transports: ['polling', 'websocket'],
-		hostname: 'localhost'
+		host: 'localhost'
 	};
 	
 	var i;
@@ -38,7 +38,7 @@ var ClusterServer = function (options) {
 	Server.call(this, opts);
 	
 	this.sourcePort = opts.sourcePort;
-	this.hostname = opts.hostname;
+	this.host = opts.host;
 	this.secure = opts.secure ? 1 : 0;
 	
 	this._ioClusterClient = opts.ioClusterClient;
@@ -70,8 +70,8 @@ ClusterServer.prototype._parseSessionId = function (cookieString) {
 
 ClusterServer.prototype.generateId = function (req) {
 	var host;
-	if (this.hostname) {
-		host = this.hostname;
+	if (this.host) {
+		host = this.host;
 	} else {
 		host = req.headers.host.match(this._hostRegex);
 		if (host) {
