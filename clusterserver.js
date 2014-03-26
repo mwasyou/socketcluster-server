@@ -43,7 +43,9 @@ var ClusterServer = function (options) {
 	
 	this._ioClusterClient = opts.ioClusterClient;
 	this._sessionIdRegex = new RegExp('(' + opts.sessionCookie + '=)([^;]*)');
+	this._sessionHostRegex = /^[^_]*/;
 	this._hostRegex = /^[^:]*/;
+	
 	this._appName = opts.appName;
 	this._url = opts.path || '/engine.io';
 	
@@ -59,9 +61,13 @@ ClusterServer.prototype.getURL = function () {
 };
 
 ClusterServer.prototype._parseSessionId = function (cookieString) {
-	if(typeof cookieString == 'string') {
+	if (typeof cookieString == 'string') {
 		var result = cookieString.match(this._sessionIdRegex);
-		if(result) {
+		if (result) {
+			var sessionHost = result[2].match(this._sessionHostRegex);
+			if (sessionHost && sessionHost[0] != this.host && sessionHost[0] != 'localhost') {
+				return null;
+			}
 			return result[2];
 		}
 	}
