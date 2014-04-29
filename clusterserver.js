@@ -97,7 +97,7 @@ ClusterServer.prototype.generateId = function (req) {
 };
 
 ClusterServer.prototype.on = function (event, listener) {
-	if (event == 'ready') {
+	if (event == 'ready' || event == 'sessiondestroy') {
 		this._ioClusterClient.on(event, listener);
 	} else {
 		Server.prototype.on.apply(this, arguments);
@@ -105,7 +105,7 @@ ClusterServer.prototype.on = function (event, listener) {
 };
 
 ClusterServer.prototype.removeListener = function (event, listener) {
-	if (event == 'ready') {
+	if (event == 'ready' || event == 'sessiondestroy') {
 		this._ioClusterClient.removeListener(event, listener);
 	} else {
 		Server.prototype.removeListener.apply(this, arguments);

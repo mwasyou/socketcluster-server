@@ -1,7 +1,7 @@
 {
   "name": "socketcluster-server",
   "description": "Server side of SocketCluster",
-  "version": "0.9.13",
+  "version": "0.9.14",
   "homepage": "https://github.com/topcloud/socketcluster-server",
   "contributors": [
     {
