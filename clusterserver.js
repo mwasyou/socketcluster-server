@@ -185,7 +185,8 @@ ClusterServer.prototype.handshake = function (transport, req) {
 			} else {
 				delete self.clients[id];
 				self.clientsCount--;
-				self.emit('disconnect', 'Socket was disconnected');
+				self.emit('disconnection', socket);
+				socket.emit('disconnect', socket);
 			}
 		});
 	});

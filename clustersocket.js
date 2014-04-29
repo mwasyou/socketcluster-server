@@ -58,7 +58,8 @@ var ClusterSocket = function (id, server, transport, namespace) {
 		'close': 1,
 		'packetCreate': 1,
 		'flush': 1,
-		'drain': 1
+		'drain': 1,
+		'disconnect': 1
 	};
 	
 	Socket.call(this, id, server, transport);
