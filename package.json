@@ -1,7 +1,7 @@
 {
   "name": "socketcluster-server",
   "description": "Server side of SocketCluster",
-  "version": "0.9.15",
+  "version": "0.9.16",
   "homepage": "https://github.com/topcloud/socketcluster-server",
   "contributors": [
     {
@@ -10,6 +10,7 @@
     }
   ],
   "dependencies": {
-    "engine.io": "1.1.0"
+    "engine.io": "1.1.0",
+    "base64id": "0.1.0"
   }
 }
