@@ -124,8 +124,19 @@ ClusterServer.prototype.handshake = function (transport, req) {
 	var self = this;
 	
 	var id = this.generateId(req);
+	
+	var transportName = transport;
 	try {
 		var transport = new transports[transport](req);
+		if ('polling' == transportName) {
+			transport.maxHttpBufferSize = this.maxHttpBufferSize;
+		}
+
+		if (req._query && req._query.b64) {
+			transport.supportsBinary = false;
+		} else {
+			transport.supportsBinary = true;
+		}
 	} catch (e) {
 		this.sendErrorMessage(req.res, Server.errors.BAD_REQUEST);
 		return;

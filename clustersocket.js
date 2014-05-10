@@ -1,7 +1,7 @@
 var engine = require('engine.io');
 var EventEmitter = require('events').EventEmitter;
 var Socket = engine.Socket;
-var json = require('./json').JSON;
+var formatter = require('./formatter');
 
 var Response = function (socket, id) {
 	this.socket = socket;
@@ -9,7 +9,7 @@ var Response = function (socket, id) {
 };
 
 Response.prototype._respond = function (responseData) {
-	this.socket.send(json.stringify(responseData));
+	this.socket.send(formatter.stringify(responseData));
 };
 
 Response.prototype.end = function (data) {
@@ -71,7 +71,7 @@ var ClusterSocket = function (id, server, transport, namespace) {
 	this._callbackMap = {};
 	
 	Socket.prototype.on.call(this, 'message', function (message) {
-		var e = json.parse(message);
+		var e = formatter.parse(message);
 		
 		if(e.event) {
 			var eventName = e.ns + '.' + e.event;
@@ -119,7 +119,7 @@ ClusterSocket.prototype.emit = function (event, data, callback) {
 			
 			this._callbackMap[cid] = {callback: callback, timeout: timeout};
 		}
-		Socket.prototype.send.call(this, json.stringify(eventObject));
+		Socket.prototype.send.call(this, formatter.stringify(eventObject));
 	} else {
 		EventEmitter.prototype.emit.call(this, event, data);
 	}
