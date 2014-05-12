@@ -181,11 +181,11 @@ ClusterServer.prototype.handshake = function (transport, req) {
 		} else {
 			socket.session = self._ioClusterClient.session(socket.ssid, socket.id, true);
 			socket.global = self._ioClusterClient.global(socket.id);
-			self.emit('connection', socket);
 			socket.emit('connect', {
 				soid: socket.id,
 				appName: self._appName
 			});
+			self.emit('connection', socket);
 		}
 	});
 	
