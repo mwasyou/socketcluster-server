@@ -179,7 +179,7 @@ ClusterServer.prototype.handshake = function (transport, req) {
 				self.emit('error', new Error(errorMessage));
 			}
 		} else {
-			socket.session = self._ioClusterClient.session(socket.ssid, socket.id);
+			socket.session = self._ioClusterClient.session(socket.ssid, socket.id, true);
 			socket.global = self._ioClusterClient.global(socket.id);
 			self.emit('connection', socket);
 			socket.emit('connect', {
