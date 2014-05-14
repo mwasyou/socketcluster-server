@@ -1,11 +1,11 @@
 var engine = require('engine.io');
 var Server = engine.Server;
-var ClusterSocket = require('./clustersocket');
+var ClusterSocket = require('./scsocket');
 var transports = engine.transports;
 var EventEmitter = require('events').EventEmitter;
 var base64id = require('base64id');
 
-var ClusterServer = function (options) {
+var SCServer = function (options) {
 	var self = this;
 	var opts = {
 		transports: ['polling', 'websocket'],
@@ -54,13 +54,13 @@ var ClusterServer = function (options) {
 	};
 };
 
-ClusterServer.prototype = Object.create(Server.prototype);
+SCServer.prototype = Object.create(Server.prototype);
 
-ClusterServer.prototype.getURL = function () {
+SCServer.prototype.getURL = function () {
 	return this._url;
 };
 
-ClusterServer.prototype._parseSessionId = function (cookieString) {
+SCServer.prototype._parseSessionId = function (cookieString) {
 	if (typeof cookieString == 'string') {
 		var result = cookieString.match(this._sessionIdRegex);
 		if (result) {
@@ -74,7 +74,7 @@ ClusterServer.prototype._parseSessionId = function (cookieString) {
 	return null;
 };
 
-ClusterServer.prototype.generateId = function (req) {
+SCServer.prototype.generateId = function (req) {
 	var host;
 	if (this.host) {
 		host = this.host;
@@ -96,7 +96,7 @@ ClusterServer.prototype.generateId = function (req) {
 	return host + '_' + port + '_' + this.sourcePort + '_' + this.secure + '_' + base64id.generateId();
 };
 
-ClusterServer.prototype.on = function (event, listener) {
+SCServer.prototype.on = function (event, listener) {
 	if (event == 'ready' || event == 'sessiondestroy') {
 		this._ioClusterClient.on(event, listener);
 	} else {
@@ -104,7 +104,7 @@ ClusterServer.prototype.on = function (event, listener) {
 	}
 };
 
-ClusterServer.prototype.removeListener = function (event, listener) {
+SCServer.prototype.removeListener = function (event, listener) {
 	if (event == 'ready' || event == 'sessiondestroy') {
 		this._ioClusterClient.removeListener(event, listener);
 	} else {
@@ -112,7 +112,7 @@ ClusterServer.prototype.removeListener = function (event, listener) {
 	}
 };
 
-ClusterServer.prototype.sendErrorMessage = function (res, code) {
+SCServer.prototype.sendErrorMessage = function (res, code) {
 	res.writeHead(400, {'Content-Type': 'application/json'});
 	res.end(JSON.stringify({
 		code: code,
@@ -120,7 +120,7 @@ ClusterServer.prototype.sendErrorMessage = function (res, code) {
 	}));
 };
 
-ClusterServer.prototype.handshake = function (transport, req) {
+SCServer.prototype.handshake = function (transport, req) {
 	var self = this;
 	
 	var id = this.generateId(req);
@@ -203,4 +203,4 @@ ClusterServer.prototype.handshake = function (transport, req) {
 	});
 };
 
-module.exports = ClusterServer;
+module.exports = SCServer;

@@ -5,12 +5,12 @@
 var http = require('http');
 
 /**
- * Expose ClusterServer constructor.
+ * Expose SCServer constructor.
  *
  * @api public
  */
  
-module.exports.ClusterServer = require('./clusterserver');
+module.exports.SCServer = require('./scserver');
 
 /**
  * Expose ClusterSocket constructor.
@@ -18,7 +18,7 @@ module.exports.ClusterServer = require('./clusterserver');
  * @api public
  */
  
-module.exports.ClusterSocket = require('./clustersocket');
+module.exports.ClusterSocket = require('./scsocket');
 
 /**
  * Creates an http.Server exclusively used for WS upgrades.
@@ -26,7 +26,7 @@ module.exports.ClusterSocket = require('./clustersocket');
  * @param {Number} port
  * @param {Function} callback
  * @param {Object} options
- * @return {ClusterServer} websocket cluster server
+ * @return {SCServer} websocket cluster server
  * @api public
  */
  
@@ -54,12 +54,12 @@ module.exports.listen = function (port, options, fn) {
  *
  * @param {http.Server} server
  * @param {Object} options
- * @return {ClusterServer} websocket cluster server
+ * @return {SCServer} websocket cluster server
  * @api public
  */
  
 module.exports.attach = function (server, options) {
-	var clusterServer = new module.exports.ClusterServer(options);
+	var socketClusterServer = new module.exports.SCServer(options);
 	var options = options || {};
 	var path = (options.path || '/engine.io').replace(/\/$/, '');
 
@@ -79,11 +79,11 @@ module.exports.attach = function (server, options) {
 
 	var listeners = server.listeners('request').slice(0);
 	server.removeAllListeners('request');
-	server.on('close', clusterServer.close.bind(clusterServer));
+	server.on('close', socketClusterServer.close.bind(socketClusterServer));
 
 	server.on('request', function (req, res) {
 		if (check(req)) {
-			clusterServer.handleRequest(req, res);
+			socketClusterServer.handleRequest(req, res);
 		} else {
 			for (var i = 0, l = listeners.length; i < l; i++) {
 				listeners[i].call(server, req, res);
@@ -91,10 +91,10 @@ module.exports.attach = function (server, options) {
 		}
 	});
 
-	if (~clusterServer.transports.indexOf('websocket')) {
+	if (~socketClusterServer.transports.indexOf('websocket')) {
 		server.on('upgrade', function (req, socket, head) {
 			if (check(req)) {
-				clusterServer.handleUpgrade(req, socket, head);
+				socketClusterServer.handleUpgrade(req, socket, head);
 			} else if (false !== options.destroyUpgrade) {
 				setTimeout(function () {
 					if (socket.writable && socket.bytesWritten <= 0) {
@@ -105,13 +105,13 @@ module.exports.attach = function (server, options) {
 		});
 	}
 
-	var trns = clusterServer.transports;
+	var trns = socketClusterServer.transports;
 	var policy = options.policyFile;
 	if (~trns.indexOf('flashsocket') && false !== policy) {
 		server.on('connection', function (socket) {
-			clusterServer.handleSocket(socket);
+			socketClusterServer.handleSocket(socket);
 		});
 	}
 
-	return clusterServer;
+	return socketClusterServer;
 };
