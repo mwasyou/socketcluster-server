@@ -1,7 +1,7 @@
 /**
  * Module dependencies.
  */
- 
+
 var http = require('http');
 
 /**
@@ -9,7 +9,7 @@ var http = require('http');
  *
  * @api public
  */
- 
+
 module.exports.SCServer = require('./scserver');
 
 /**
@@ -17,7 +17,7 @@ module.exports.SCServer = require('./scserver');
  *
  * @api public
  */
- 
+
 module.exports.ClusterSocket = require('./scsocket');
 
 /**
@@ -29,7 +29,7 @@ module.exports.ClusterSocket = require('./scsocket');
  * @return {SCServer} websocket cluster server
  * @api public
  */
- 
+
 module.exports.listen = function (port, options, fn) {
 	if ('function' == typeof options) {
 		fn = options;
@@ -57,7 +57,7 @@ module.exports.listen = function (port, options, fn) {
  * @return {SCServer} websocket cluster server
  * @api public
  */
- 
+
 module.exports.attach = function (server, options) {
 	var socketClusterServer = new module.exports.SCServer(options);
 	var options = options || {};
