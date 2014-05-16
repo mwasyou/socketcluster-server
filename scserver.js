@@ -4,9 +4,11 @@ var ClusterSocket = require('./scsocket');
 var transports = engine.transports;
 var EventEmitter = require('events').EventEmitter;
 var base64id = require('base64id');
+var async = require('async');
 
 var SCServer = function (options) {
   var self = this;
+  
   var opts = {
     transports: ['polling', 'websocket'],
     host: 'localhost'
@@ -16,6 +18,13 @@ var SCServer = function (options) {
   for (i in options) {
     opts[i] = options[i];
   }
+  
+  this.MIDDLEWARE_HANDSHAKE = 'handshake';
+  this.MIDDLEWARE_EVENT = 'event';
+
+  this._middleware = {};
+  this._middleware[this.MIDDLEWARE_HANDSHAKE] = [];
+  this._middleware[this.MIDDLEWARE_EVENT] = [];
   
   var pollingEnabled = false;
   for (i in opts.transports) {
@@ -45,6 +54,7 @@ var SCServer = function (options) {
   this._sessionIdRegex = new RegExp('(' + opts.sessionCookie + '=)([^;]*)');
   this._sessionHostRegex = /^[^_]*/;
   this._hostRegex = /^[^:]*/;
+  this._hasSidRegex = /[?&]sid=/;
   
   this._appName = opts.appName;
   this._url = opts.path || '/engine.io';
@@ -118,6 +128,28 @@ SCServer.prototype.sendErrorMessage = function (res, code) {
     code: code,
     message: Server.errorMessages[code]
   }));
+};
+
+SCServer.prototype.addMiddleware = function (type, middleware) {
+  this._middleware[type].push(middleware);
+};
+
+SCServer.prototype.verify = function (req, upgrade, fn) {
+  var self = this;
+  
+  var handshakeMiddleware = this._middleware[this.MIDDLEWARE_HANDSHAKE];
+  if (handshakeMiddleware.length < 1 || this._hasSidRegex.test(req.url)) {
+    Server.prototype.verify.call(this, req, upgrade, fn);
+  } else {
+    async.applyEachSeries(handshakeMiddleware, req, function (err) {
+      if (err) {
+        self.emit('notice', err);
+        fn(err);
+      } else {
+        Server.prototype.verify.call(self, req, upgrade, fn);
+      }
+    });
+  }
 };
 
 SCServer.prototype.handshake = function (transport, req) {
