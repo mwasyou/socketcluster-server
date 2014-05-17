@@ -20,11 +20,9 @@ var SCServer = function (options) {
   }
   
   this.MIDDLEWARE_HANDSHAKE = 'handshake';
-  this.MIDDLEWARE_EVENT = 'event';
 
   this._middleware = {};
   this._middleware[this.MIDDLEWARE_HANDSHAKE] = [];
-  this._middleware[this.MIDDLEWARE_EVENT] = [];
   
   var pollingEnabled = false;
   for (i in opts.transports) {
