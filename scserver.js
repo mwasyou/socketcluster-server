@@ -64,6 +64,10 @@ var SCServer = function (options) {
 
 SCServer.prototype = Object.create(Server.prototype);
 
+SCServer.prototype.global = function () {
+  return this._ioClusterClient.global();
+};
+
 SCServer.prototype.getURL = function () {
   return this._url;
 };

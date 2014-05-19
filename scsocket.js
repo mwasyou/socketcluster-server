@@ -46,7 +46,7 @@ Response.prototype.error = function (error, data) {
   }
 };
 
-var ClusterSocket = function (id, server, transport, namespace) {
+var ClusterSocket = function (id, server, transport) {
   this._localEvents = {
     'open': 1,
     'error': 1,
@@ -65,7 +65,6 @@ var ClusterSocket = function (id, server, transport, namespace) {
   Socket.call(this, id, server, transport);
   
   var self = this;
-  this.namespace = namespace || '__';
   
   this._cid = 1;
   this._callbackMap = {};
@@ -74,9 +73,8 @@ var ClusterSocket = function (id, server, transport, namespace) {
     var e = formatter.parse(message);
     
     if(e.event) {
-      var eventName = e.ns + '.' + e.event;
       var response = new Response(self, e.cid);
-      EventEmitter.prototype.emit.call(self, eventName, e.data, response);
+      EventEmitter.prototype.emit.call(self, e.event, e.data, response);
     } else if (e.cid != null) {
       var ret = self._callbackMap[e.cid];
       if (ret) {
@@ -90,18 +88,13 @@ var ClusterSocket = function (id, server, transport, namespace) {
 
 ClusterSocket.prototype = Object.create(Socket.prototype);
 
-ClusterSocket.prototype.ns = function (namespace) {
-  return new NS(namespace, this);
-};
-
 ClusterSocket.prototype._nextCallId = function () {
-  return this.namespace + '-' + this._cid++;
+  return this._cid++;
 };
 
 ClusterSocket.prototype.emit = function (event, data, callback) {
   if (this._localEvents[event] == null) {
     var eventObject = {
-      ns: this.namespace,
       event: event
     };
     if (data !== undefined) {
@@ -127,8 +120,7 @@ ClusterSocket.prototype.emit = function (event, data, callback) {
 
 ClusterSocket.prototype.on = function (event, listener) {
   if (this._localEvents[event] == null) {
-    var eventName = this.namespace + '.' + event;
-    EventEmitter.prototype.on.call(this, eventName, listener);
+    EventEmitter.prototype.on.call(this, event, listener);
   } else {
     EventEmitter.prototype.on.apply(this, arguments);
   }
@@ -136,8 +128,7 @@ ClusterSocket.prototype.on = function (event, listener) {
 
 ClusterSocket.prototype.once = function (event, listener) {
   if (this._localEvents[event] == null) {
-    var eventName = this.namespace + '.' + event;
-    EventEmitter.prototype.once.call(this, eventName, listener);
+    EventEmitter.prototype.once.call(this, event, listener);
   } else {
     EventEmitter.prototype.once.apply(this, arguments);
   }
@@ -145,50 +136,18 @@ ClusterSocket.prototype.once = function (event, listener) {
 
 ClusterSocket.prototype.removeListener = function (event, listener) {
   if (this._localEvents[event] == null) {
-    var eventName = this.namespace + '.' + event;
-    EventEmitter.prototype.removeListener.call(this, eventName, listener);
+    EventEmitter.prototype.removeListener.call(this, event, listener);
   } else {
     EventEmitter.prototype.removeListener.apply(this, arguments);
   }
 };
 
 ClusterSocket.prototype.removeAllListeners = function (event) {
-  if (event) {
-    event = this.namespace + '.' + event;
-  }
   EventEmitter.prototype.removeAllListeners.call(this, event);
 };
 
 ClusterSocket.prototype.listeners = function (event) {
-  event = this.namespace + '.' + event;
   EventEmitter.prototype.listeners.call(this, event);
-};
-
-var NS = function (namespace, socket) {
-  var self = this;
-  
-  // Generate methods which will apply the namespace to all calls on the underlying socket.
-  for (var i in socket) {
-    if (socket[i] instanceof Function) {
-      (function (j) {
-        self[j] = function () {
-          var prevNS = socket.namespace;
-          socket.namespace = namespace;
-          socket[j].apply(socket, arguments);
-          socket.namespace = prevNS;
-        };
-      })(i);
-    } else {
-      this[i] = socket[i];
-    }
-  }
-  
-  this.namespace = namespace;
-  this.socket = socket;
-  
-  this.ns = function () {
-    return socket.ns.apply(socket, arguments);
-  };
 };
 
 module.exports = ClusterSocket;
