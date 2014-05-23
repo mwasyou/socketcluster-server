@@ -28,7 +28,7 @@ Response.prototype.end = function (data) {
 Response.prototype.error = function (error, data) {
   if (this.id) {
     var err;
-    if(error instanceof Error) {
+    if (error instanceof Error) {
       err = {name: error.name, message: error.message, stack: error.stack};      
     } else {
       err = error;
@@ -72,7 +72,7 @@ var ClusterSocket = function (id, server, transport) {
   Socket.prototype.on.call(this, 'message', function (message) {
     var e = formatter.parse(message);
     
-    if(e.event) {
+    if (e.event) {
       var response = new Response(self, e.cid);
       EventEmitter.prototype.emit.call(self, e.event, e.data, response);
     } else if (e.cid != null) {

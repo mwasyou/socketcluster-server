@@ -215,11 +215,13 @@ SCServer.prototype.handshake = function (transport, req) {
     } else {
       socket.session = self._ioClusterClient.session(socket.ssid, socket.id, true);
       socket.global = self._ioClusterClient.global(socket.id);
+      
       socket.emit('connect', {
         soid: socket.id,
         appName: self._appName
+      }, function (err) {
+        self.emit('connection', socket);
       });
-      self.emit('connection', socket);
     }
   });
   
