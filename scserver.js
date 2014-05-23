@@ -202,12 +202,12 @@ SCServer.prototype.handshake = function (transport, req) {
   var ssid = this._parseSessionId(headers.cookie);
   socket.ssid = ssid || socket.id;
   
-  this._ioClusterClient.bind(socket, function (err, sock, notice) {
+  this._ioClusterClient.bind(socket, function (err, sock, isNotice) {
     if (err) {
       var errorMessage = 'Failed to bind socket to io cluster - ' + err;
       socket.emit('fail', errorMessage);
       socket.close();
-      if (notice) {
+      if (isNotice) {
         self.emit('notice', errorMessage);
       } else {
         self.emit('error', new Error(errorMessage));
