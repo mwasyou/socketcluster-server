@@ -57,16 +57,14 @@ var SCServer = function (options) {
   this._appName = opts.appName;
   this._url = opts.path || '/engine.io';
   
+  this.global = this._ioClusterClient.global();
+  
   this._handleSocketError = function (error) {
     self.emit('error', error);
   };
 };
 
 SCServer.prototype = Object.create(Server.prototype);
-
-SCServer.prototype.global = function () {
-  return this._ioClusterClient.global();
-};
 
 SCServer.prototype.getURL = function () {
   return this._url;
