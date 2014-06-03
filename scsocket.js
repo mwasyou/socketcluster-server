@@ -74,7 +74,13 @@ var ClusterSocket = function (id, server, transport) {
     
     if (e.event) {
       var response = new Response(self, e.cid);
-      EventEmitter.prototype.emit.call(self, e.event, e.data, response);
+      server.verifyEvent(self, e.event, e.data, function (err) {
+        if (err) {
+          response.error(err);
+        } else {
+          EventEmitter.prototype.emit.call(self, e.event, e.data, response);
+        }
+      });
     } else if (e.cid != null) {
       var ret = self._callbackMap[e.cid];
       if (ret) {

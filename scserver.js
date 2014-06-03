@@ -20,9 +20,11 @@ var SCServer = function (options) {
   }
   
   this.MIDDLEWARE_HANDSHAKE = 'handshake';
+  this.MIDDLEWARE_EVENT = 'event';
 
   this._middleware = {};
   this._middleware[this.MIDDLEWARE_HANDSHAKE] = [];
+  this._middleware[this.MIDDLEWARE_EVENT] = [];
   
   var pollingEnabled = false;
   for (i in opts.transports) {
@@ -132,6 +134,22 @@ SCServer.prototype.sendErrorMessage = function (res, code) {
 
 SCServer.prototype.addMiddleware = function (type, middleware) {
   this._middleware[type].push(middleware);
+};
+
+SCServer.prototype.verifyEvent = function (socket, event, data, fn) {
+  var self = this;
+  
+  var eventMiddleware = this._middleware[this.MIDDLEWARE_EVENT];
+  if (eventMiddleware.length) {
+    async.applyEachSeries(eventMiddleware, socket, event, data, function (err) {
+      if (err) {
+        self.emit('notice', err); 
+      }
+      fn(err);
+    });
+  } else {
+    fn();
+  }
 };
 
 SCServer.prototype.verify = function (req, upgrade, fn) {
